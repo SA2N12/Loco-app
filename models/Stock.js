@@ -12,7 +12,7 @@ const stockSchema = new mongoose.Schema({
         default: ''
     },
     quantity: {
-        type: number,
+        type: Number,
         default: 1
     }
 });

@@ -11,13 +11,14 @@ router.get('/', indexController.getIndex);
 
 //lists
 router.get('/listes', listsController.getLists);
-router.post('/listes', listsController.addList);
+router.post('/listes', listsController.createList);
 router.get('/listes/:id', listsController.getList);
 router.put('/listes/:id', listsController.updateList);
 router.delete('/listes/:id', listsController.deleteList);
 
 //stock
 router.get('/stock', stockController.getStock);
+router.post('/stock', stockController.createStock);
 
 //recipes
 router.get('/recettes', recipesController.getRecipes);

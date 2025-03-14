@@ -11,7 +11,7 @@ exports.getLists = async (req, res) => {
     }
 };
 
-exports.addList = [
+exports.createList = [
     body('listName').notEmpty().withMessage('Le nom de la liste est obligatoire'),
     async (req, res) => {
         const errors = validationResult(req);
