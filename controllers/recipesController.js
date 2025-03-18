@@ -1,3 +1,3 @@
 exports.getRecipes = async (req, res) => {
-    res.render('recipes/recipes.ejs', { errors: [] });
+    res.render('recipe/recipes.ejs', { errors: [] });
 }

@@ -44,6 +44,7 @@
                     <div class="bg-white p-4 rounded-lg shadow-lg w-full max-w-xs mx-auto">
                         <h3 class="text-lg font-bold text-gray-800 mb-2"><%= list.name %></h3>
                         <p><%= list.description %></p>
+                        <p><strong>longueur: <%= list.items.length %></strong></p>
                         <div class="flex justify-end space-x-2 mt-4">
                             <form action="/listes/<%= list._id %>?_method=DELETE" method="post">
                                 <button type="submit" class="p-2 hover:text-red-700">

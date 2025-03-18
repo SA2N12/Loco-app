@@ -7,7 +7,10 @@ const listSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    ingredients: [String],
+    items: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Item'
+    }],
     description: {
         type : String,
         default: ''
