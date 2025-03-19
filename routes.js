@@ -29,8 +29,13 @@ router.get('/stocks/:id', stockController.getStock);
 router.put('/stocks/:id', stockController.updateStock);
 router.delete('/stocks/:id', stockController.deleteStock);
 
-//items
+// items
 router.get('/items', itemController.getItems);
+router.get('/items/new', itemController.getNewItem);
+router.post('/items', itemController.createItem);
+router.get('/items/:id/edit', itemController.getEditItem);
+router.put('/items/:id', itemController.updateItem);
+router.delete('/items/:id', itemController.deleteItem);
 
 //export
 module.exports = router;
