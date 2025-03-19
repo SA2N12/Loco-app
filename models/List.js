@@ -1,28 +1,14 @@
-//imports
 const mongoose = require('mongoose');
 
-//schema
-const listSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    items: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Item'
-    }],
-    description: {
-        type : String,
-        default: ''
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+const ListItemSchema = new mongoose.Schema({
+  item: { type: mongoose.Schema.Types.ObjectId, ref: 'Item', required: true },
+  listQuantity: { type: Number, required: true, default: 1 }
 });
 
-//model
-const List = mongoose.model('List', listSchema);
+const ListSchema = new mongoose.Schema({
+  name: String,
+  description: String,
+  items: [ListItemSchema]
+});
 
-//export
-module.exports = List;
+module.exports = mongoose.model('List', ListSchema);

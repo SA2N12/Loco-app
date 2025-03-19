@@ -76,11 +76,10 @@ exports.updateItem = async (req, res) => {
 // Supprimer un item
 exports.deleteItem = async (req, res) => {
   try {
-    const { id } = req.params;
-    await Item.findByIdAndDelete(id);
+    await Item.findByIdAndDelete(req.params.id);
     res.redirect('/items');
   } catch (err) {
     console.error(err);
-    res.status(500).send("Erreur Serveur");
+    res.status(500).send('Server Error');
   }
 };

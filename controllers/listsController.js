@@ -1,6 +1,5 @@
 const { body, validationResult } = require('express-validator');
 const List = require('../models/list');
-const Stock = require('../models/Stock');
 const Item = require('../models/Item');
 
 exports.getLists = async (req, res) => {
@@ -44,16 +43,20 @@ exports.createList = [
 exports.getList = async (req, res) => {
     try {
         const listId = req.params.id;
+        // Peuplement des items de la liste
         const list = await List.findById(listId).populate('items');
-        if (!list) {
-            return res.status(404).send('Liste introuvable');
-        }
-        // Récupérer les items avec une quantité supérieure à 0 pour le select
+        if (!list) return res.status(404).send('Liste introuvable');
+
+        // Récupérer les items disponibles pour le select (par exemple ceux en stock)
         const items = await Item.find({ quantity: { $gt: 0 } });
-        res.render('list/listEdit.ejs', { list, items });
+
+        // Récupérer tous les stocks (en supposant que vous avez un modèle Stock)
+        const stocks = await Stock.find({});
+
+        res.render('list/listEdit.ejs', { list, items, stocks });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Erreur Serveur');
+        res.status(500).send("Erreur Serveur");
     }
 };
 
@@ -106,35 +109,35 @@ exports.deleteList = async (req, res) => {
 
 exports.addNewItemToList = async (req, res) => {
     try {
-      const { id } = req.params;
-      const { itemId, itemQuantity } = req.body;
-      const parsedQty = parseInt(itemQuantity, 10) || 1;
-  
-      // Récupérer l'item de référence (pour obtenir son nom, etc.)
-      const baseItem = await Item.findById(itemId);
-      if (!baseItem) return res.status(404).send("Item source introuvable");
-  
-      // Créer un nouvel item en base (même si c'est un doublon) avec la quantité fournie
-      const newItem = new Item({
-        name: baseItem.name,
-        // Ajoutez ici d'autres champs si nécessaire
-        quantity: parsedQty
-      });
-      await newItem.save();
-  
-      // Ajouter cet item à la liste
-      const list = await List.findById(id);
-      if (!list) return res.status(404).send("Liste introuvable");
-      list.items = list.items || [];
-      list.items.push(newItem._id);
-      await list.save();
-  
-      res.redirect('/listes/' + id);
+        const { id } = req.params;                  // id de la liste
+        const { itemId, itemQuantity } = req.body;   // quantité demandée dans la liste
+        const parsedQty = parseInt(itemQuantity, 10) || 1;
+
+        // Vérifier que l'item de référence existe
+        const baseItem = await require('../models/Item').findById(itemId);
+        if (!baseItem) return res.status(404).send("Item source introuvable");
+
+        // Récupérer la liste
+        const List = require('/models/List');
+        const list = await List.findById(id);
+        if (!list) return res.status(404).send("Liste introuvable");
+
+        // Pour éviter les doublons, on peut vérifier si cet item est déjà dans la liste
+        const existing = list.items.find(li => li.item.toString() === itemId);
+        if (existing) {
+            return res.status(400).send('Cet item est déjà présent dans la liste.');
+        }
+
+        // Ajouter à la liste l'item avec la quantité souhaitée (liste indépendante du stock)
+        list.items.push({ item: itemId, listQuantity: parsedQty });
+
+        await list.save();
+        res.redirect('/listes/' + id);
     } catch (err) {
-      console.error(err);
-      res.status(500).send("Erreur Serveur");
+        console.error(err);
+        res.status(500).send("Erreur Serveur");
     }
-  };
+};
 
 exports.deleteItemFromList = async (req, res) => {
     try {

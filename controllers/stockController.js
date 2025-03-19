@@ -1,5 +1,4 @@
 const { body, validationResult } = require('express-validator');
-const Stock = require('../models/Stock');
 const Item = require('../models/Item');
 
 exports.getStocks = async (req, res) => {
@@ -7,7 +6,7 @@ exports.getStocks = async (req, res) => {
         // Récupérer uniquement les items dont la quantité est supérieure à 0
         const items = await Item.find({ quantity: { $gt: 0 } }).sort({ createdAt: -1 });
         res.render('stock/stocks', { 
-            stocks: items,
+            items,
             errors: []
         });
     } catch (err) {
@@ -17,12 +16,12 @@ exports.getStocks = async (req, res) => {
 };
 
 exports.createStock = [
-    // Valider que le nom du stock n'est pas vide
+    // Valider que le nom ne soit pas vide
     body('stockName').notEmpty().withMessage('Le nom du stock est obligatoire'),
     
     async (req, res) => {
         const errors = validationResult(req);
-        const stocks = await Stock.find();
+        const stocks = await Item.find();
         
         // En cas d'erreur de validation
         if (!errors.isEmpty()) {
@@ -33,8 +32,8 @@ exports.createStock = [
         }
         
         try {
-            // Vérifier si un stock avec ce nom existe déjà
-            const stockExists = await Stock.findOne({ name: req.body.stockName });
+            // Vérifier si un item avec ce nom existe déjà
+            const stockExists = await Item.findOne({ name: req.body.stockName });
             if (stockExists) {
                 return res.render('stock/stocks', { 
                     errors: [{ msg: 'Ce stock existe déjà' }], 
@@ -42,14 +41,14 @@ exports.createStock = [
                 });
             }
             
-            // Créer et sauvegarder le nouveau stock
-            const newStock = new Stock({
+            // Créer et sauvegarder le nouvel item
+            const newItem = new Item({
                 name: req.body.stockName,
                 quantity: req.body.stockQuantity,
                 createdAt: new Date()
             });
             
-            await newStock.save();
+            await newItem.save();
             res.redirect('/stocks');
         } catch (err) {
             console.error(err);
@@ -61,7 +60,10 @@ exports.createStock = [
 exports.getStock = async (req, res) => {
     try {
         const stockId = req.params.id;
-        const stock = await Stock.findById(stockId);
+        const stock = await Item.findById(stockId);
+        if (!stock) {
+            return res.status(404).send("Stock non trouvé");
+        }
         return res.render('stock/stockEdit', { stock });
     } catch (err) {
         console.error(err);
@@ -72,7 +74,7 @@ exports.getStock = async (req, res) => {
 exports.updateStock = async (req, res) => {
     try {
         const stockId = req.params.id;
-        const updatedStock = await Stock.findByIdAndUpdate(
+        const updatedStock = await Item.findByIdAndUpdate(
             stockId,
             { 
                 name: req.body.stockName, 
@@ -92,7 +94,7 @@ exports.updateStock = async (req, res) => {
 
 exports.deleteStock = async (req, res) => {
     try {
-        await Stock.findByIdAndDelete(req.params.id);
+        await Item.findByIdAndDelete(req.params.id);
         res.redirect('/stocks');
     } catch (err) {
         console.error(err);
