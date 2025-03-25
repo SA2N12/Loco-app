@@ -1,5 +1,6 @@
 //imports
 const Item = require('../models/Item');
+const Stock = require('../models/Stock');
 
 // Affiche la liste des items
 exports.getItems = async (req, res) => {
@@ -26,7 +27,7 @@ exports.getNewItem = (req, res) => {
   res.render('item/newItem.ejs');
 };
 
-// Créer un nouvel item
+// Créer un nouvel item et un stock associé
 exports.createItem = async (req, res) => {
   try {
     const { name, quantity } = req.body;
@@ -35,6 +36,14 @@ exports.createItem = async (req, res) => {
     }
     const newItem = new Item({ name, quantity: quantity || 1 });
     await newItem.save();
+
+    // Créer un stock correspondant en référence à ce nouvel item
+    const newStock = new Stock({
+      item: newItem._id,        // référence à l'item
+      quantity: newItem.quantity // ou définir une quantité initiale spécifique
+    });
+    await newStock.save();
+
     res.redirect('/items');
   } catch (err) {
     console.error(err);

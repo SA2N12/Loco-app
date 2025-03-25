@@ -35,33 +35,38 @@
 
             <!-- Formulaire séparé pour ajouter un item -->
             <form action="/listes/<%= list._id %>/item" method="post" class="mt-6 space-y-2">
-                <label for="itemSelect" class="font-medium text-gray-700">Ajouter un item existant</label>
-                <div class="flex space-x-2">
-                    <select id="itemSelect" name="itemId" class="flex-1 border border-gray-300 rounded p-2">
+                <div class="mb-4">
+                    <label for="item-select" class="block text-gray-700 font-medium mb-2">Ajouter un item</label>
+                    <select name="itemId" id="item-select" class="w-full border border-gray-300 rounded p-2">
                         <% items.forEach(item=> { %>
                             <option value="<%= item._id %>">
                                 <%= item.name %>
                             </option>
                             <% }); %>
                     </select>
-                    <input type="number" id="quantity" name="itemQuantity"
-                        class="w-24 border border-gray-300 rounded p-2" value="1" min="1" />
-                    <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
-                        Ajouter
-                    </button>
+                </div>
+
+                <!-- Vous pouvez ajouter ici éventuellement un champ pour la quantité souhaitée -->
+                <div class="mb-4">
+                    <label for="itemQuantity" class="block text-gray-700 font-medium mb-2">Quantité</label>
+                    <input type="number" id="itemQuantity" name="itemQuantity" value="1" min="1"
+                        class="w-full border border-gray-300 rounded p-2">
+                </div>
+                <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                    Ajouter
+                </button>
                 </div>
             </form>
 
             <!-- Liste des items (suppression séparée) -->
             <div class="flex flex-col space-y-4 mt-8">
                 <% (list.items || []).forEach(item=> {
-                    // On recherche dans stocks l'objet stock correspondant (ici, en utilisant le nom)
                     const stockItem = stocks.find(s => s.name === item.name);
                     const stockQty = stockItem ? stockItem.quantity : 0;
                     %>
                     <div class="flex items-center justify-between bg-gray-100 p-2 rounded">
                         <p>
-                            <%= item.name %> x<%= item.quantity %>
+                            <%= item.name %> x <%= item.quantity %>
                                     <span class="px-1 py-0.5 text-xs rounded"
                                         style="background-color: <%= stockQty === 0 ? '#F4A9A8' : ( item.quantity > stockQty ? '#FFA726' : '#8BC34A' ) %>; color: white;">
                                         Stock restant : <%= stockQty %>

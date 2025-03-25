@@ -1,14 +1,14 @@
 const { body, validationResult } = require('express-validator');
+const Stock = require('../models/Stock');
 const Item = require('../models/Item');
 
 exports.getStocks = async (req, res) => {
     try {
-        // Récupérer uniquement les items dont la quantité est supérieure à 0
-        const items = await Item.find({ quantity: { $gt: 0 } }).sort({ createdAt: -1 });
-        res.render('stock/stocks', { 
-            items,
-            errors: []
-        });
+        // Récupérer les stocks avec la référence "item" remplie (populée)
+        const stocks = await Stock.find({})
+                                  .populate('item')
+                                  .sort({ createdAt: -1 });
+        res.render('stock/stocks', { stocks, errors: [] });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -18,36 +18,36 @@ exports.getStocks = async (req, res) => {
 exports.createStock = [
     // Valider que le nom ne soit pas vide
     body('stockName').notEmpty().withMessage('Le nom du stock est obligatoire'),
-    
+
     async (req, res) => {
         const errors = validationResult(req);
         const stocks = await Item.find();
-        
+
         // En cas d'erreur de validation
         if (!errors.isEmpty()) {
-            return res.render('stock/stocks', { 
-                errors: errors.array(), 
-                stocks 
+            return res.render('stock/stocks', {
+                errors: errors.array(),
+                stocks
             });
         }
-        
+
         try {
             // Vérifier si un item avec ce nom existe déjà
             const stockExists = await Item.findOne({ name: req.body.stockName });
             if (stockExists) {
-                return res.render('stock/stocks', { 
-                    errors: [{ msg: 'Ce stock existe déjà' }], 
-                    stocks 
+                return res.render('stock/stocks', {
+                    errors: [{ msg: 'Ce stock existe déjà' }],
+                    stocks
                 });
             }
-            
+
             // Créer et sauvegarder le nouvel item
             const newItem = new Item({
                 name: req.body.stockName,
                 quantity: req.body.stockQuantity,
                 createdAt: new Date()
             });
-            
+
             await newItem.save();
             res.redirect('/stocks');
         } catch (err) {
@@ -67,23 +67,20 @@ exports.getStock = async (req, res) => {
         return res.render('stock/stockEdit', { stock });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error');   
+        res.status(500).send('Server Error');
     }
 };
 
 exports.updateStock = async (req, res) => {
     try {
         const stockId = req.params.id;
-        const updatedStock = await Item.findByIdAndUpdate(
+        const updatedStock = await Stock.findByIdAndUpdate(
             stockId,
-            { 
-                name: req.body.stockName, 
-                quantity: req.body.stockQuantity 
-            },
+            { quantity: req.body.stockQuantity },
             { new: true }
         );
         if (!updatedStock) {
-            return res.status(404).send('Stock not found');
+            return res.status(404).send('Stock non trouvé');
         }
         res.redirect('/stocks');
     } catch (err) {

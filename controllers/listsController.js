@@ -1,6 +1,7 @@
 const { body, validationResult } = require('express-validator');
 const List = require('../models/list');
 const Item = require('../models/Item');
+const Stock = require('../models/Stock');
 
 exports.getLists = async (req, res) => {
     try {
@@ -48,7 +49,7 @@ exports.getList = async (req, res) => {
         if (!list) return res.status(404).send('Liste introuvable');
 
         // Récupérer les items disponibles pour le select (par exemple ceux en stock)
-        const items = await Item.find({ quantity: { $gt: 0 } });
+        const items = await Item.find({});
 
         // Récupérer tous les stocks (en supposant que vous avez un modèle Stock)
         const stocks = await Stock.find({});
@@ -87,6 +88,7 @@ exports.updateList = async (req, res) => {
                 console.log("Item déjà présent dans la liste.");
             }
             // Optionnel : gérer la quantité stockQuantity si nécessaire
+            list.items.push({ item: itemId, listQuantity: stockQuantity });
         }
 
         await list.save();
@@ -117,8 +119,6 @@ exports.addNewItemToList = async (req, res) => {
         const baseItem = await require('../models/Item').findById(itemId);
         if (!baseItem) return res.status(404).send("Item source introuvable");
 
-        // Récupérer la liste
-        const List = require('/models/List');
         const list = await List.findById(id);
         if (!list) return res.status(404).send("Liste introuvable");
 
