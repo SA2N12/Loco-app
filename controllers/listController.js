@@ -2,6 +2,7 @@ const { body, validationResult } = require('express-validator');
 const List = require('../models/list');
 const Item = require('../models/Item');
 const Stock = require('../models/Stock');
+const Recipe = require('../models/Recipe');
 
 exports.getLists = async (req, res) => {
     try {
@@ -55,8 +56,10 @@ exports.getList = async (req, res) => {
         // Récupérer tous les stocks
         const stocks = await Stock.find({}).populate('item');
 
+        const recipes = await Recipe.find();
+
         // Rendre la vue avec les données mises à jour
-        res.render('list/listEdit.ejs', { list, items, stocks });
+        res.render('list/listEdit.ejs', { list, items, stocks, recipes });
     } catch (err) {
         console.error(err);
         res.status(500).send("Erreur Serveur");
@@ -151,11 +154,50 @@ exports.deleteItemFromList = async (req, res) => {
 
         // Si itemToRemove.remove() n'est pas défini, utilisez filter pour retirer l'item
         list.items = list.items.filter(item => item._id.toString() !== itemId);
-        
+
         await list.save();
         res.redirect(`/listes/${id}`);
     } catch (err) {
         console.error(err);
         res.status(500).send("Erreur Serveur");
+    }
+};
+
+exports.addRecipeToList = async (req, res) => {
+    try {
+        console.log('req.body:', req.body);
+        const { id } = req.params;
+        const { recipeId } = req.body;
+
+        // Rechercher la liste
+        const list = await List.findById(id);
+        if (!list) {
+            return res.status(404).send('Liste introuvable');
+        }
+
+        // Rechercher la recette par son id et peupler les items
+        const recipe = await Recipe.findById(recipeId).populate('items.item');
+        if (!recipe) {
+            return res.status(404).send('Recette non trouvée');
+        }
+
+        // Pour chaque item de la recette, on l'ajoute à la liste ou on met à jour sa quantité
+        const recipeItems = recipe.items || [];
+        for (const recipeItem of recipeItems) {
+            // Utiliser recipeItem.item._id si l'item est peuplé, sinon recipeItem.item
+            const recipeItemId = recipeItem.item._id ? recipeItem.item._id.toString() : recipeItem.item.toString();
+            const existing = list.items.find(li => li.item.toString() === recipeItemId);
+            if (existing) {
+                existing.listQuantity += recipeItem.recipeQuantity;
+            } else {
+                list.items.push({ item: recipeItem.item, listQuantity: recipeItem.recipeQuantity });
+            }
+        }
+
+        await list.save();
+        res.redirect(`/listes/${id}`);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send("Erreur serveur");
     }
 };

@@ -18,6 +18,7 @@ router.put('/listes/:id', listController.updateList);
 router.delete('/listes/:id', listController.deleteList);
 router.post('/listes/:id/item', listController.addNewItemToList);
 router.delete('/listes/:id/item/:itemId', listController.deleteItemFromList);
+router.post('/listes/:id/recette', listController.addRecipeToList);
 
 //stocks
 router.post('/stocks', stockController.createStock);
@@ -29,9 +30,11 @@ router.delete('/stocks/:id', stockController.deleteStock);
 //recipes
 router.post('/recettes', recipeController.createRecipe);
 router.get('/recettes', recipeController.getRecipes);
-router.get('/recettes/detail/:id', recipeController.getRecipeDetails);
 router.put('/recettes/detail/:id', recipeController.updateRecipe);
 router.delete('/recettes/detail/:id', recipeController.deleteRecipe);
+router.post('/recettes/detail/:id/item', recipeController.createRecipeItem);
+router.get('/recettes/detail/:id', recipeController.getRecipeDetails);
+router.delete('/recettes/detail/:id/item/:itemId', recipeController.deleteRecipeItem);
 
 //items
 router.post('/items', itemController.createItem);
