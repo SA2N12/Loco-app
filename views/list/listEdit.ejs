@@ -66,7 +66,7 @@
                     %>
                     <div class="flex items-center justify-between bg-gray-100 p-2 rounded">
                         <p>
-                            <%= item.name %> x <%= item.quantity %>
+                            <%= item.item.name %> x <%= item.listQuantity %>
                                     <span class="px-1 py-0.5 text-xs rounded"
                                         style="background-color: <%= stockQty === 0 ? '#F4A9A8' : ( item.quantity > stockQty ? '#FFA726' : '#8BC34A' ) %>; color: white;">
                                         Stock restant : <%= stockQty %>

@@ -44,16 +44,18 @@ exports.createList = [
 exports.getList = async (req, res) => {
     try {
         const listId = req.params.id;
-        // Peuplement des items de la liste
-        const list = await List.findById(listId).populate('items');
+
+        // Récupérer la liste avec les items peuplés
+        const list = await List.findById(listId).populate('items.item');
         if (!list) return res.status(404).send('Liste introuvable');
 
-        // Récupérer les items disponibles pour le select (par exemple ceux en stock)
+        // Récupérer les items disponibles pour le select
         const items = await Item.find({});
 
-        // Récupérer tous les stocks (en supposant que vous avez un modèle Stock)
-        const stocks = await Stock.find({});
+        // Récupérer tous les stocks
+        const stocks = await Stock.find({}).populate('item');
 
+        // Rendre la vue avec les données mises à jour
         res.render('list/listEdit.ejs', { list, items, stocks });
     } catch (err) {
         console.error(err);
@@ -146,13 +148,14 @@ exports.deleteItemFromList = async (req, res) => {
         if (!list) {
             return res.status(404).send('Liste non trouvée');
         }
-        // S'assurer que list.items est défini
-        list.items = list.items || [];
-        list.items = list.items.filter(item => item.toString() !== itemId);
+
+        // Si itemToRemove.remove() n'est pas défini, utilisez filter pour retirer l'item
+        list.items = list.items.filter(item => item._id.toString() !== itemId);
+        
         await list.save();
-        res.redirect('/listes/' + id);
+        res.redirect(`/listes/${id}`);
     } catch (err) {
         console.error(err);
-        res.status(500).send('Erreur Serveur');
+        res.status(500).send("Erreur Serveur");
     }
 };
