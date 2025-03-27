@@ -2,37 +2,41 @@
 const express = require('express');
 const router = express.Router();
 const indexController = require('./controllers/indexController');
-const listsController = require('./controllers/listsController');
+const listController = require('./controllers/listController');
 const stockController = require('./controllers/stockController');
-const recipesController = require('./controllers/recipesController');
+const recipeController = require('./controllers/recipeController');
 const itemController = require('./controllers/itemController');
 
 //index
 router.get('/', indexController.getIndex);
 
 //lists
-router.get('/listes', listsController.getLists);
-router.post('/listes', listsController.createList);
-router.get('/listes/:id', listsController.getList);
-router.put('/listes/:id', listsController.updateList);
-router.delete('/listes/:id', listsController.deleteList);
-router.post('/listes/:id/item', listsController.addNewItemToList);
-router.delete('/listes/:id/item/:itemId', listsController.deleteItemFromList);
-
-//recipes
-router.get('/recettes', recipesController.getRecipes);
+router.post('/listes', listController.createList);
+router.get('/listes', listController.getLists);
+router.get('/listes/:id', listController.getList);
+router.put('/listes/:id', listController.updateList);
+router.delete('/listes/:id', listController.deleteList);
+router.post('/listes/:id/item', listController.addNewItemToList);
+router.delete('/listes/:id/item/:itemId', listController.deleteItemFromList);
 
 //stocks
-router.get('/stocks', stockController.getStocks);
 router.post('/stocks', stockController.createStock);
+router.get('/stocks', stockController.getStocks);
 router.get('/stocks/:id', stockController.getStock);
 router.put('/stocks/:id', stockController.updateStock);
 router.delete('/stocks/:id', stockController.deleteStock);
 
-// items
+//recipes
+router.post('/recettes', recipeController.createRecipe);
+router.get('/recettes', recipeController.getRecipes);
+router.get('/recettes/detail/:id', recipeController.getRecipeDetails);
+router.put('/recettes/detail/:id', recipeController.updateRecipe);
+router.delete('/recettes/detail/:id', recipeController.deleteRecipe);
+
+//items
+router.post('/items', itemController.createItem);
 router.get('/items', itemController.getItems);
 router.get('/items/new', itemController.getNewItem);
-router.post('/items', itemController.createItem);
 router.get('/items/:id/edit', itemController.getEditItem);
 router.put('/items/:id', itemController.updateItem);
 router.delete('/items/:id', itemController.deleteItem);

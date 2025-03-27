@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loco</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+</head>
+
+<body class="bg-gray-100">
+    <%- include('../partials/nav') %>
+        <main class="max-w-md mx-auto p-4 bg-white shadow-md rounded mt-10">
+            <h1 class="text-2xl font-bold text-center mb-6">Modifier la recette</h1>
+            <form action="/recettes/detail/<%= recipe._id %>?_method=PUT" method="post" class="space-y-4">
+                <div>
+                    <label for="recipeName" class="block text-gray-700 font-medium mb-2">Nom de la recette</label>
+                    <input type="text" id="recipeName" name="recipeName" value="<%= recipe.name %>"
+                        class="w-full border border-gray-300 rounded p-2" required>
+                </div>
+                <div>
+                    <label for="recipeDescription" class="block text-gray-700 font-medium mb-2">Description</label>
+                    <textarea id="recipeDescription" name="recipeDescription" rows="4"
+                        class="w-full border border-gray-300 rounded p-2" required><%= recipe.description %></textarea>
+                </div>
+                <div class="flex justify-between">
+                    <button type="submit"
+                        class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        Enregistrer les modifications
+                    </button>
+                    <a href="/recettes" class="text-blue-500 hover:text-blue-700 self-center">
+                        Annuler
+                    </a>
+                </div>
+            </form>
+            <hr class="my-4">
+            <form action="/recettes/detail/<%= recipe._id %>?_method=DELETE" method="post">
+                <button type="submit"
+                    class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400">
+                    Supprimer
+                </button>
+            </form>
+        </main>
+</body>
+
+</html>
