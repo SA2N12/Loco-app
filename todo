@@ -5,3 +5,4 @@
 - affiche les items sur les recipes
 - ajout de catégorie sur item, stock, recipe, list
 - gestion des erreurs
+- adapter le projet en react native
