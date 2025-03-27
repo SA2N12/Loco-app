@@ -61,14 +61,16 @@
             <!-- Liste des items (suppression séparée) -->
             <div class="flex flex-col space-y-4 mt-8">
                 <% (list.items || []).forEach(item=> {
-                    const stockItem = stocks.find(s => s.name === item.name);
+                    const stockItem = stocks.find(s => s.item._id.toString() === item.item._id.toString());
                     const stockQty = stockItem ? stockItem.quantity : 0;
                     %>
                     <div class="flex items-center justify-between bg-gray-100 p-2 rounded">
                         <p>
                             <%= item.item.name %> x <%= item.listQuantity %>
                                     <span class="px-1 py-0.5 text-xs rounded"
-                                        style="background-color: <%= stockQty === 0 ? '#F4A9A8' : ( item.quantity > stockQty ? '#FFA726' : '#8BC34A' ) %>; color: white;">
+                                        style="background-color: <%= stockQty === 0 
+                                  ? '#F4A9A8' 
+                                  : ((stockQty > 0 && stockQty < item.listQuantity) ? '#FFA726' : '#8BC34A') %>; color: white;">
                                         Stock restant : <%= stockQty %>
                                     </span>
                         </p>
