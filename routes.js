@@ -6,6 +6,7 @@ const listController = require('./controllers/listController');
 const stockController = require('./controllers/stockController');
 const recipeController = require('./controllers/recipeController');
 const itemController = require('./controllers/itemController');
+const userController = require('./controllers/userController');
 
 //index
 router.get('/', indexController.getIndex);
@@ -43,6 +44,16 @@ router.get('/items/new', itemController.getNewItem);
 router.get('/items/:id/edit', itemController.getEditItem);
 router.put('/items/:id', itemController.updateItem);
 router.delete('/items/:id', itemController.deleteItem);
+
+//user
+//inscription
+router.post('/inscription', userController.postRegister);
+router.get('/inscription', userController.getRegister);
+//connexion
+router.post('/connexion', userController.postLogin);
+router.get('/connexion', userController.getLogin);
+//deconnexion
+router.get('/deconnexion', userController.getLogout);
 
 //export
 module.exports = router;

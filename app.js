@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const router = require('./routes');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override');
+const session = require('express-session');
 
 const app = express(); 
 const port = 3000;
@@ -19,6 +20,15 @@ catch (error) {
 }
 
 //middlewares
+app.use(session({
+    secret: 'votreSecret',
+    resave: false,
+    saveUninitialized: false
+}));
+app.use((req, res, next) => {
+    res.locals.user = req.session.user || null;
+    next();
+});
 app.use(express.urlencoded({extended: true}));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(methodOverride('_method'));
