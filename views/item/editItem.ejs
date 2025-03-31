@@ -18,6 +18,21 @@
                     <input type="text" id="name" name="name" value="<%= item.name %>"
                         class="w-full border border-gray-300 rounded p-2" required />
                 </div>
+                <div>
+                    <label for="price" class="block mb-2 font-medium text-gray-700">Prix de l'item</label>
+                    <input type="number" id="price" name="price" value="<%= item.price %>"
+                        class="w-full border border-gray-300 rounded p-2" required />
+                </div>
+                <div>
+                    <label for="category" class="block mb-2 font-medium text-gray-700">Catégorie de l'item</label>
+                    <select id="category" name="category" class="w-full border border-gray-300 rounded p-2" required>
+                        <% categories.forEach(cat=> { %>
+                            <option value="<%= cat %>" <%=item.category===cat ? 'selected' : '' %>>
+                                <%= cat %>
+                            </option>
+                            <% }) %>
+                    </select>
+                </div>
                 <button type="submit"
                     class="w-full bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">Enregistrer</button>
             </form>

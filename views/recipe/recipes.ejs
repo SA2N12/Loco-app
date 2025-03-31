@@ -39,8 +39,21 @@
                         <p>
                             <%= recipe.description %>
                         </p>
+                        <p>
+                            <%= recipe.user.username %>
+                        </p>
+                        <% recipe.items.forEach(item => { %>
+                            <% if (item.item) { %>
+                                <p class="text-sm text-gray-600">
+                                    <%= item.item.name %>
+                                </p>
+                            <% } else { %>
+                                <p class="text-sm text-gray-600">Item inconnu</p>
+                            <% } %>
+                        <% }); %>
                         <form action="/recettes/detail/<%= recipe._id %>">
-                            <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                            <button type="submit"
+                                class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
                                 Voir
                             </button>
                         </form>

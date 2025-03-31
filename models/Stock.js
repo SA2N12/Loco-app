@@ -9,8 +9,12 @@ const stockSchema = new mongoose.Schema({
   quantity: {
     type: Number,
     default: 0
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
-  // Ajoutez d'autres champs si nécessaire
 });
 
 module.exports = mongoose.model('Stock', stockSchema); 

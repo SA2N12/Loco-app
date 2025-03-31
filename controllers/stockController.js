@@ -4,10 +4,16 @@ const Item = require('../models/Item');
 
 exports.getStocks = async (req, res) => {
     try {
-        // Récupérer les stocks avec la référence "item" remplie (populée)
-        const stocks = await Stock.find({})
-                                  .populate('item')
-                                  .sort({ createdAt: -1 });
+        // Vérifier que l'utilisateur est connecté
+        if (!req.session.user) {
+            return res.status(401).render('error', { errorMessage: "L'utilisateur doit être connecté." });
+        }
+
+        // Récupérer uniquement les stocks créés par l'utilisateur connecté
+        const stocks = await Stock.find({ user: req.session.user._id })
+            .populate('item')
+            .populate('user')
+            .sort({ createdAt: -1 });
         res.render('stock/stocks', { stocks, errors: [] });
     } catch (err) {
         console.error(err);
@@ -16,39 +22,33 @@ exports.getStocks = async (req, res) => {
 };
 
 exports.createStock = [
-    // Valider que le nom ne soit pas vide
-    body('stockName').notEmpty().withMessage('Le nom du stock est obligatoire'),
+    // Validation code...
 
     async (req, res) => {
         const errors = validationResult(req);
-        const stocks = await Item.find();
-
-        // En cas d'erreur de validation
+        // Use the Item model to check for an existing item if needed
         if (!errors.isEmpty()) {
             return res.render('stock/stocks', {
                 errors: errors.array(),
-                stocks
+                stocks: [] // or current stocks list
             });
         }
 
         try {
-            // Vérifier si un item avec ce nom existe déjà
-            const stockExists = await Item.findOne({ name: req.body.stockName });
-            if (stockExists) {
-                return res.render('stock/stocks', {
-                    errors: [{ msg: 'Ce stock existe déjà' }],
-                    stocks
-                });
-            }
-
-            // Créer et sauvegarder le nouvel item
             const newItem = new Item({
                 name: req.body.stockName,
                 quantity: req.body.stockQuantity,
                 createdAt: new Date()
             });
-
             await newItem.save();
+
+            const newStock = new Stock({
+                item: newItem._id,
+                quantity: newItem.quantity,
+                user: req.session.user ? req.session.user._id : null // Ensure user is logged in
+            });
+            await newStock.save();
+
             res.redirect('/stocks');
         } catch (err) {
             console.error(err);

@@ -6,8 +6,16 @@ const Recipe = require('../models/Recipe');
 
 exports.getLists = async (req, res) => {
     try {
-        const lists = await List.find();
-        res.render('list/lists.ejs', { errors: [], lists });
+        // Vérifiez que l'utilisateur est connecté
+        if (!req.session.user) {
+            return res.status(401).render('error', { errorMessage: "L'utilisateur doit être connecté." });
+        }
+        // Récupérer uniquement les listes de l'utilisateur connecté
+        const lists = await List.find({ user: req.session.user._id })
+            .populate('items.item')
+            .populate('user')
+            .sort({ createdAt: -1 });
+        res.render('list/lists.ejs', { lists, errors: [] });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -17,33 +25,40 @@ exports.getLists = async (req, res) => {
 exports.createList = [
     body('listName').notEmpty().withMessage('Le nom de la liste est obligatoire'),
     async (req, res) => {
+        if (!req.session.user) {
+            return res.status(401).render('error', { errorMessage: "L'utilisateur doit être connecté." });
+        }
         const errors = validationResult(req);
-        let lists = await List.find();
+        // Récupérer uniquement les listes de l'utilisateur connecté
+        let lists = await List.find({ user: req.session.user._id });
 
-        // Renvoi une erreur si la liste ne contient pas de nom
         if (!errors.isEmpty()) {
+            // On retourne la vue d'erreur avec uniquement les listes de l'utilisateur connecté
             return res.render('list/lists.ejs', { errors: errors.array(), lists });
         }
 
-        // Vérifier si la liste existe déjà
-        let list = lists.find(list => list.name === req.body.listName);
-        if (list) {
+        let listExistante = lists.find(list => list.name === req.body.listName);
+        if (listExistante) {
             errors.errors.push({ msg: 'La liste existe déjà' });
             return res.render('list/lists.ejs', { errors: errors.array(), lists });
         }
 
-        // Créer une nouvelle liste
-        let newList = new List({ name: req.body.listName });
+        let newList = new List({
+            name: req.body.listName,
+            description: req.body.description,
+            user: req.session.user._id
+        });
         await newList.save();
-
-        // Puis rediriger ou re-rendre la page avec la liste mise à jour
-        lists = await List.find();
-        res.render('list/lists.ejs', { errors: [], lists });
+        res.redirect('/listes');
     }
 ];
 
 exports.getList = async (req, res) => {
     try {
+        if (!req.session.user) {
+            return res.status(401).render('error', { errorMessage: "L'utilisateur doit être connecté." });
+        }
+
         const listId = req.params.id;
 
         // Récupérer la liste avec les items peuplés
@@ -51,12 +66,13 @@ exports.getList = async (req, res) => {
         if (!list) return res.status(404).send('Liste introuvable');
 
         // Récupérer les items disponibles pour le select
-        const items = await Item.find({});
+        const items = await Item.find({ user: req.session.user._id });
 
-        // Récupérer tous les stocks
-        const stocks = await Stock.find({}).populate('item');
+        // Récupérer tous les stocks de l'utilisateur connecté
+        const stocks = await Stock.find({ user: req.session.user._id }).populate('item');
 
-        const recipes = await Recipe.find();
+        // Récupérer toutes les recettes de l'utilisateur connecté
+        const recipes = await Recipe.find({ user: req.session.user._id });
 
         // Rendre la vue avec les données mises à jour
         res.render('list/listEdit.ejs', { list, items, stocks, recipes });
@@ -107,10 +123,16 @@ exports.updateList = async (req, res) => {
 
 exports.deleteList = async (req, res) => {
     try {
-        await List.findByIdAndDelete(req.params.id);
+        if (!req.session.user) {
+            return res.status(401).render('error', { errorMessage: "L'utilisateur doit être connecté." });
+        }
+        // Supprimer uniquement la liste appartenant à l'utilisateur connecté
+        await List.findOneAndDelete({ _id: req.params.id, user: req.session.user._id });
+        // Redirection vers GET /listes
+        res.redirect('/listes');
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error');
+        res.status(500).send("Erreur Serveur");
     }
 };
 
@@ -199,5 +221,34 @@ exports.addRecipeToList = async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).send("Erreur serveur");
+    }
+};
+
+exports.updateListItemQuantity = async (req, res) => {
+    try {
+        const { id, itemId } = req.params;
+        console.log("Liste ID :", id);
+        console.log("Item ID :", itemId);
+
+        const action = req.body.action;
+        const list = await List.findById(id);
+        if (!list) return res.status(404).send('Liste non trouvée');
+
+        // Chercher l'item dans la liste par son _id plutôt que par item.toString()
+        const listItem = list.items.find(li => li._id.toString() === itemId);
+        if (!listItem) return res.status(404).send("Item dans la liste non trouvé");
+
+        // Mise à jour en fonction de l'action
+        if (action === 'increment') {
+            listItem.listQuantity = (listItem.listQuantity || 1) + 1;
+        } else if (action === 'decrement' && listItem.listQuantity > 1) {
+            listItem.listQuantity = listItem.listQuantity - 1;
+        }
+
+        await list.save();
+        res.redirect('/listes/' + id);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Erreur Serveur");
     }
 };

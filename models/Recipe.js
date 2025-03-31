@@ -12,7 +12,12 @@ const RecipeSchema = new Schema({
     name: String,
     description: String,
     items: [RecipeItemSchema],
-    cost: Number
+    cost: Number,
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    }
 });
 
 //exports

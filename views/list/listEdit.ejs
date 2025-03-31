@@ -83,13 +83,34 @@
                     %>
                     <div class="flex items-center justify-between bg-gray-100 p-2 rounded">
                         <p>
-                            <%= item.item.name %> x <%= item.listQuantity %>
+                            <%= item.item.name %>
+                                <div class="flex items-center space-x-2">
+                                    <!-- Bouton decrement -->
+                                    <form action="/listes/<%= list._id %>/item/<%= item._id %>?_method=PUT"
+                                        method="post">
+                                        <input type="hidden" name="action" value="decrement" />
+                                        <button type="submit" class="px-2 py-1 bg-gray-300 rounded text-xl">-</button>
+                                    </form>
+
+                                    <!-- Affichage de la quantité -->
+                                    <span class="px-2">
+                                        <%= item.listQuantity %>
+                                    </span>
+
+                                    <!-- Bouton increment -->
+                                    <form action="/listes/<%= list._id %>/item/<%= item._id %>?_method=PUT"
+                                        method="post">
+                                        <input type="hidden" name="action" value="increment" />
+                                        <button type="submit" class="px-2 py-1 bg-gray-300 rounded text-xl">+</button>
+                                    </form>
+
                                     <span class="px-1 py-0.5 text-xs rounded"
                                         style="background-color: <%= stockQty === 0 
                                   ? '#ff5632' 
                                   : ((stockQty > 0 && stockQty < item.listQuantity) ? '#FFA726' : '#8BC34A') %>; color: white;">
                                         Stock restant : <%= stockQty %>
                                     </span>
+                                </div>
                         </p>
                         <form action="/listes/<%= list._id %>/item/<%= item._id %>?_method=DELETE" method="post">
                             <button type="submit" class="text-red-500 text-xs hover:text-red-700 px-2 py-1">

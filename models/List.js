@@ -8,7 +8,14 @@ const ListItemSchema = new mongoose.Schema({
 const ListSchema = new mongoose.Schema({
   name: String,
   description: String,
-  items: [ListItemSchema]
+  items: [ListItemSchema],
+  price: Number,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  createdAt: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('List', ListSchema);

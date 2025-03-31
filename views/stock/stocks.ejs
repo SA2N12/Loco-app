@@ -37,6 +37,7 @@
                                 </h2>
                                 <p>Quantité : <%= stock.quantity %>
                                 </p>
+                                <p><%= stock.user.username%></p>
                                 <!-- Formulaire de modification de la quantité -->
                                 <form action="/stocks/<%= stock._id %>?_method=PUT" method="post"
                                     class="flex items-center space-x-2 my-2">
